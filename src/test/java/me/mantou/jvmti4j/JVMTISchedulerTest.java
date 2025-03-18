@@ -19,7 +19,7 @@ public class JVMTISchedulerTest {
     }
 
     @Test
-    void retransformAvailableTest() throws InterruptedException {
+    void retransformAvailableTest() {
         JVMTIScheduler.setLoadHook(
                 (clazz, originalData) -> {
                     assertEquals(clazz, JVMTISchedulerTest.class);

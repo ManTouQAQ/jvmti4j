@@ -4,9 +4,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.*;
 
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JVMTISchedulerTest {
+
 
     @BeforeEach
     void setUp() {
@@ -30,17 +33,34 @@ public class JVMTISchedulerTest {
     }
 
     @Test
-    void retransformTest(){
+    void getLoadedClassesTest() {
+        assertTrue(
+                Arrays.stream(JVMTIScheduler.getLoadedClasses())
+                        .anyMatch(c -> c == JVMTISchedulerTest.class)
+        );
+    }
+
+    @Test
+    void errorCatchTest() {
+        JVMTIScheduler.setLoadHook(
+                (clazz, originalData) -> new byte[]{ (byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE }
+        );
+
+        assertThrowsExactly(JVMTIException.class, () -> JVMTIScheduler.retransformClass(JVMTISchedulerTest.class));
+    }
+
+    @Test
+    void retransformTest() {
         JVMTIScheduler.setLoadHook(
                 (clazz, originalData) -> {
-                    if (clazz == Dog.class){
+                    if (clazz == Dog.class) {
                         ClassReader classReader = new ClassReader(originalData);
                         ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_FRAMES);
                         classReader.accept(new ClassVisitor(Opcodes.ASM9, classWriter) {
                             @Override
                             public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
                                 MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
-                                if (name.equals("getName")){
+                                if (name.equals("getName")) {
                                     return new MethodVisitor(Opcodes.ASM9, mv) {
                                         @Override
                                         public void visitCode() {
@@ -63,11 +83,11 @@ public class JVMTISchedulerTest {
         assertEquals(dog.getName(), "abc");
     }
 
-    public static abstract class Animal{
+    public static abstract class Animal {
         public abstract String getName();
     }
 
-    public static class Dog extends Animal{
+    public static class Dog extends Animal {
         @Override
         public String getName() {
             return "qwe";

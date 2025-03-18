@@ -78,7 +78,7 @@ public enum JVMTIError {
 
     @Override
     public String toString() {
-        return "JVMTIError{" +
+        return this.name() + "{" +
                 "code=" + code +
                 '}';
     }

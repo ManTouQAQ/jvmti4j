@@ -40,6 +40,7 @@ public final class JVMTIScheduler {
     }
 
     private static native int retransformClass0(Class<?> clazz);
+    public static native Class<?>[] getLoadedClasses();
 
     @FunctionalInterface
     public interface LoadHook {

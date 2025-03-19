@@ -23,6 +23,14 @@ JNIEXPORT jint JNICALL Java_me_mantou_jvmti4j_JVMTIScheduler_retransformClass0
 JNIEXPORT jobjectArray JNICALL Java_me_mantou_jvmti4j_JVMTIScheduler_getLoadedClasses
   (JNIEnv *, jclass);
 
+/*
+ * Class:     me_mantou_jvmti4j_JVMTIScheduler
+ * Method:    getClassLoaderClasses
+ * Signature: (Ljava/lang/ClassLoader;)[Ljava/lang/Class;
+ */
+JNIEXPORT jobjectArray JNICALL Java_me_mantou_jvmti4j_JVMTIScheduler_getClassLoaderClasses
+  (JNIEnv *, jclass, jobject);
+
 #ifdef __cplusplus
 }
 #endif

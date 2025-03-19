@@ -1,19 +1,26 @@
 package me.mantou.jvmti4j;
 
+import me.mantou.jvmti4j.util.OneClassClassLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.*;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JVMTISchedulerTest {
-
+    private Path workDir;
 
     @BeforeEach
     void setUp() {
-        System.load("E:\\Personal\\IdeaProjects\\jvmti4j\\jvmti4j-native\\cmake-build-release\\jvmti4j_native.dll");
+        workDir = Paths.get(System.getProperty("user.dir"));
+        System.load(workDir.resolve("jvmti4j-native/cmake-build-release/jvmti4j_native.dll").toString());
     }
 
     @Test
@@ -41,9 +48,30 @@ public class JVMTISchedulerTest {
     }
 
     @Test
+    void getClassLoaderClassesTest() throws ClassNotFoundException {
+        File clazzFile = workDir.resolve("build/classes/java/test/me/mantou/jvmti4j/model/TestObj.class").toFile();
+        byte[] buf;
+        try (FileInputStream inputStream = new FileInputStream(clazzFile)) {
+            buf = inputStream.readAllBytes();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        OneClassClassLoader classLoader = new OneClassClassLoader(null, "me.mantou.jvmti4j.model.TestObj", buf);
+        classLoader.loadClass("java.lang.String");
+        classLoader.loadClass("me.mantou.jvmti4j.model.TestObj");
+
+        for (Class<?> loaderClass : JVMTIScheduler.getClassLoaderClasses(classLoader)) {
+            if (loaderClass.isArray()) continue;
+            if (loaderClass.getClassLoader() != classLoader) continue;
+            assertEquals(loaderClass.getName(), "me.mantou.jvmti4j.model.TestObj");
+        }
+    }
+
+    @Test
     void errorCatchTest() {
         JVMTIScheduler.setLoadHook(
-                (clazz, originalData) -> new byte[]{ (byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE }
+                (clazz, originalData) -> new byte[]{(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE}
         );
 
         assertThrowsExactly(JVMTIException.class, () -> JVMTIScheduler.retransformClass(JVMTISchedulerTest.class));

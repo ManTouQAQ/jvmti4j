@@ -69,6 +69,27 @@ JNIEXPORT jobjectArray JNICALL Java_me_mantou_jvmti4j_JVMTIScheduler_getLoadedCl
     return result;
 }
 
+JNIEXPORT jobjectArray JNICALL Java_me_mantou_jvmti4j_JVMTIScheduler_getClassLoaderClasses
+(JNIEnv *env, jclass jclazz, jobject classLoader) {
+    jint count;
+    jclass *classes;
+    (*jvmti)->GetClassLoaderClasses(jvmti, classLoader, &count, &classes);
+
+    jobjectArray result = (*env)->NewObjectArray(
+        env,
+        count,
+        (*env)->FindClass(env, "java/lang/Class"),
+        NULL
+    );
+
+    for (int i = 0; i < count; i++) {
+        (*env)->SetObjectArrayElement(env, result, i, classes[i]);
+    }
+
+    (*jvmti)->Deallocate(jvmti, (unsigned char *) classes);
+    return result;
+}
+
 void JNICALL classLoadHook(jvmtiEnv *jvmti_env,
                            JNIEnv *jni_env,
                            jclass class_being_redefined,

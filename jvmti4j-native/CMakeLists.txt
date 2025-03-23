@@ -3,6 +3,7 @@ project(jvmti4j_native C)
 
 set(CMAKE_C_STANDARD 11)
 set(INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include")
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:DebugDLL>")
 
 include_directories(
         ${INCLUDE_DIR}

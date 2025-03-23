@@ -8,6 +8,7 @@ import org.objectweb.asm.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -78,10 +79,25 @@ public class JVMTISchedulerTest {
     }
 
     @Test
+    void redefineTest(){
+        Dog dog = new Dog();
+        assertEquals(dog.getName(), "qwe");
+
+        try (InputStream stream = Dog.class.getResourceAsStream("/Dog.class.modified")){
+            assert stream != null;
+            JVMTIScheduler.redefineClass(Dog.class, stream.readAllBytes());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        assertEquals(dog.getName(), "abc");
+    }
+
+    @Test
     void retransformTest() {
         JVMTIScheduler.setLoadHook(
                 (clazz, originalData) -> {
-                    if (clazz == Dog.class) {
+                    if (clazz == Cat.class) {
                         ClassReader classReader = new ClassReader(originalData);
                         ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_FRAMES);
                         classReader.accept(new ClassVisitor(Opcodes.ASM9, classWriter) {
@@ -105,17 +121,29 @@ public class JVMTISchedulerTest {
                     return null;
                 }
         );
-        Dog dog = new Dog();
-        assertEquals(dog.getName(), "qwe");
-        JVMTIScheduler.retransformClass(Dog.class);
-        assertEquals(dog.getName(), "abc");
+        Cat cat = new Cat();
+        assertEquals(cat.getName(), "qwe");
+        JVMTIScheduler.retransformClass(Cat.class);
+        assertEquals(cat.getName(), "abc");
     }
+
+
+    /**
+     * 注意 Dog 和 Cat 测试的时候只能使用一次 因为 Redefine 或 Retransform 之后字节码就会永久改变!
+     */
 
     public static abstract class Animal {
         public abstract String getName();
     }
 
     public static class Dog extends Animal {
+        @Override
+        public String getName() {
+            return "qwe";
+        }
+    }
+
+    public static class Cat extends Animal {
         @Override
         public String getName() {
             return "qwe";

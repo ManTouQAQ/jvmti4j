@@ -43,6 +43,8 @@ public final class JVMTIScheduler {
 
     public static native Class<?>[] getLoadedClasses();
 
+    public static native int redefineClass(Class<?> clazz, byte[] data);
+
     /**
      * Get class loader loaded classes
      *

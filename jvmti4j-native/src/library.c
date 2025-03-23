@@ -90,6 +90,17 @@ JNIEXPORT jobjectArray JNICALL Java_me_mantou_jvmti4j_JVMTIScheduler_getClassLoa
     return result;
 }
 
+JNIEXPORT jint JNICALL Java_me_mantou_jvmti4j_JVMTIScheduler_redefineClass
+(JNIEnv *env, jclass jclazz, jclass target, jbyteArray data) {
+    jvmtiClassDefinition definition;
+    definition.klass = target;
+    definition.class_byte_count = (*env)->GetArrayLength(env, data);
+    definition.class_bytes = (*env)->GetPrimitiveArrayCritical(env, data, NULL);
+    const jvmtiError result = (*jvmti)->RedefineClasses(jvmti, 1, &definition);
+    (*env)->ReleasePrimitiveArrayCritical(env, data, (jbyte *) definition.class_bytes, 0);
+    return result;
+}
+
 void JNICALL classLoadHook(jvmtiEnv *jvmti_env,
                            JNIEnv *jni_env,
                            jclass class_being_redefined,

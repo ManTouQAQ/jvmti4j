@@ -26,14 +26,14 @@ public class JVMTISchedulerTest {
 
     @Test
     void internalNameTest() {
-        assertEquals(Type.getInternalName(JVMTIScheduler.LoadHook.class), "me/mantou/jvmti4j/JVMTIScheduler$LoadHook");
+        assertEquals("me/mantou/jvmti4j/JVMTIScheduler$LoadHook", Type.getInternalName(JVMTIScheduler.LoadHook.class));
     }
 
     @Test
     void retransformAvailableTest() {
         JVMTIScheduler.setLoadHook(
                 (clazz, originalData) -> {
-                    assertEquals(clazz, JVMTISchedulerTest.class);
+                    assertEquals(JVMTISchedulerTest.class, clazz);
                     return originalData;
                 }
         );
@@ -65,7 +65,7 @@ public class JVMTISchedulerTest {
         for (Class<?> loaderClass : JVMTIScheduler.getClassLoaderClasses(classLoader)) {
             if (loaderClass.isArray()) continue;
             if (loaderClass.getClassLoader() != classLoader) continue;
-            assertEquals(loaderClass.getName(), "me.mantou.jvmti4j.model.TestObj");
+            assertEquals("me.mantou.jvmti4j.model.TestObj", loaderClass.getName());
         }
     }
 
@@ -79,18 +79,18 @@ public class JVMTISchedulerTest {
     }
 
     @Test
-    void redefineTest(){
+    void redefineTest() {
         Dog dog = new Dog();
-        assertEquals(dog.getName(), "qwe");
+        assertEquals("qwe", dog.getName());
 
-        try (InputStream stream = Dog.class.getResourceAsStream("/Dog.class.modified")){
+        try (InputStream stream = Dog.class.getResourceAsStream("/Dog.class.modified")) {
             assert stream != null;
             JVMTIScheduler.redefineClass(Dog.class, stream.readAllBytes());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-        assertEquals(dog.getName(), "abc");
+        assertEquals("abc", dog.getName());
     }
 
     @Test
@@ -122,9 +122,9 @@ public class JVMTISchedulerTest {
                 }
         );
         Cat cat = new Cat();
-        assertEquals(cat.getName(), "qwe");
+        assertEquals("qwe", cat.getName());
         JVMTIScheduler.retransformClass(Cat.class);
-        assertEquals(cat.getName(), "abc");
+        assertEquals("abc", cat.getName());
     }
 
 

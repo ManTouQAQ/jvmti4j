@@ -27,6 +27,8 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
     (*jvmti)->GetPotentialCapabilities(jvmti, &capabilities);
     capabilities.can_retransform_classes = 1;
     capabilities.can_redefine_classes = 1;
+    // capabilities.can_retransform_any_class = 1;
+    // capabilities.can_redefine_any_class = 1;
     jvmtiError err = (*jvmti)->AddCapabilities(jvmti, &capabilities);
     if (err != JVMTI_ERROR_NONE) {
         return JNI_ERR;
